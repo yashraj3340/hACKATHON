@@ -1,41 +1,71 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import AssetList from "./components/AssetList";
-import AddAsset from "./components/AddAsset";
-import AssetMap from "./components/AssetMap";
+import React, { useState } from "react";
+import axios from "axios";
+import "./App.css";
 
 function App() {
-  return (
-    <Router>
-      <div className="container">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <Link to="/" className="navbar-brand">
-            Municipal Asset Management
-          </Link>
-          <div className="navbar-nav">
-            <Link to="/" className="nav-item nav-link">
-              Assets
-            </Link>
-            <Link to="/add" className="nav-item nav-link">
-              Add Asset
-            </Link>
-            <Link to="/map" className="nav-item nav-link">
-              Asset Map
-            </Link>
-          </div>
-        </nav>
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-        <Routes>
-          <Route path="/" element={<AssetList />} />
-          <Route path="/add" element={<AddAsset />} />
-          <Route path="/map" element={<AssetMap />} />
-        </Routes>
-        <div className="App">
-          <h1>Geo Mapping Application</h1>
-          <MapComponent />
+  const runModel = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.post("http://localhost:5000/run-model");
+      setResults(response.data);
+    } catch (err) {
+      setError("Error running model: " + err.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="App">
+      <h1> Resource Allocation Model </h1>{" "}
+      <button onClick={runModel} disabled={loading}>
+        {" "}
+        {loading ? "Running..." : "Run Model"}{" "}
+      </button>{" "}
+      {error && <p className="error"> {error} </p>}{" "}
+      {results && (
+        <div>
+          <h2> Results: </h2> <h3> Model Evaluation: </h3>{" "}
+          <p> MSE: {results.model_evaluation.mse} </p>{" "}
+          <p> R2: {results.model_evaluation.r2} </p>{" "}
+          <h3> Feature Importance: </h3>{" "}
+          <ul>
+            {" "}
+            {results.feature_importance.map((feature, index) => (
+              <li key={index}>
+                {" "}
+                {feature.feature}: {feature.importance}{" "}
+              </li>
+            ))}{" "}
+          </ul>{" "}
+          <h3> Department Data(First 10 entries): </h3>{" "}
+          <table>
+            <thead>
+              <tr>
+                <th> Department </th> <th> Expenditure </th> <th> Utility </th>{" "}
+                <th> Risk </th> <th> Priority </th>{" "}
+                <th> Optimal Allocation </th>{" "}
+              </tr>{" "}
+            </thead>{" "}
+            <tbody>
+              {" "}
+              {results.department_data.slice(0, 10).map((dept, index) => (
+                <tr key={index}>
+                  <td> {dept.Department} </td> <td> {dept.Expenditure} </td>{" "}
+                  <td> {dept.Utility} </td> <td> {dept.Risk} </td>{" "}
+                  <td> {dept.Priority} </td>{" "}
+                  <td> {dept.Optimal_Allocation} </td>{" "}
+                </tr>
+              ))}{" "}
+            </tbody>{" "}
+          </table>{" "}
         </div>
-      </div>
-    </Router>
+      )}{" "}
+    </div>
   );
 }
 

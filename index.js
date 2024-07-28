@@ -1,21 +1,17 @@
-// index.js
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const assets = require("./routes/assets");
-const app = express();
-const port = 3000;
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
 
-// Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/assetmanagement");
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-// Middleware
-app.use(bodyParser.json());
-
-// Routes
-app.use("/api/assets", assets);
-
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
